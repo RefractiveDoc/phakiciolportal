@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Phakic IOL Surgery Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+            box-shadow: 0 4px 10px rgba(107, 114, 128, 0.1);
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 2px solid #eff6ff;
+            padding-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        .grid-cols-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-header {
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            font-size: 24px;
+            color: #1f2937;
+            font-weight: 700;
+        }
+        .modal-body p {
+            font-size: 18px;
+            color: #4b5563;
+            margin-bottom: 25px;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            text-align: left;
+        }
+        .modal-footer button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        .modal-footer button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Admin Data Table */
+        .admin-table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+            max-height: 500px; /* Limit height for scrollable table */
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .admin-table th, .admin-table td {
+            border: 1px solid #e5e7eb;
+            padding: 10px 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .admin-table th {
+            background-color: #eff6ff;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap; /* Prevent wrapping of headers */
+        }
+        .admin-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .admin-table tr:hover {
+            background-color: #f3f4f6;
+        }
+        .scrollable-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">The Phakic IOL Surgery Portal</h1>
+
+        <div class="text-center mb-10 p-6 bg-blue-50 rounded-lg shadow-sm">
+            <p class="text-xl text-gray-700 leading-relaxed">
+                Welcome to the Refractive Surgery Data Collection Portal. I am Dr. Vaibhav Namdev. This portal is designed to streamline the collection of crucial data for patients undergoing ICL surgery. Your contributions are invaluable for advancing our understanding and improving patient outcomes.
+            </p>
+        </div>
+
+        <section id="data-entry-form" class="mb-10">
+            <h2 class="section-title">Patient Data Proforma</h2>
+
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-grow">
+                    <label for="uhid" class="block text-gray-700 font-bold mb-2">Unique Hospital ID (UHID):</label>
+                    <input type="text" id="uhid" placeholder="Enter UHID to fill or update data" class="shadow-sm">
+                </div>
+                <div class="flex-none flex items-end">
+                    <button id="load-data-btn" class="btn-secondary px-6 py-3">Load Data</button>
+                </div>
+            </div>
+
+            <form id="icl-data-form" class="space-y-6">
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" min="1" max="120" placeholder="Patient's age" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select id="gender" class="shadow-sm">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Manifest Refraction with Acceptance:</label>
+                        <input type="text" id="refraction_od" placeholder="OD (e.g., -6.00 sph -1.00 cyl x 180)" class="shadow-sm">
+                        <input type="text" id="refraction_os" placeholder="OS (e.g., -5.50 sph -0.75 cyl x 10)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>Axial Length (mm):</label>
+                        <input type="number" step="0.01" id="axial_length_od" placeholder="OD (e.g., 24.50)" class="shadow-sm">
+                        <input type="number" step="0.01" id="axial_length_os" placeholder="OS (e.g., 24.25)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Horizontal White to White diameter - IOL Master (mm):</label>
+                        <input type="number" step="0.01" id="wtw_iol_od" placeholder="OD (e.g., 11.80)" class="shadow-sm">
+                        <input type="number" step="0.01" id="wtw_iol_os" placeholder="OS (e.g., 11.75)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>Horizontal WTW diameter - Digital Callipers (mm):</label>
+                        <input type="number" step="0.01" id="wtw_caliper_od" placeholder="OD (e.g., 12.00)" class="shadow-sm">
+                        <input type="number" step="0.01" id="wtw_caliper_os" placeholder="OS (e.g., 11.95)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Endo ACD (mm):</label>
+                        <input type="number" step="0.01" id="endo_acd_od" placeholder="OD (e.g., 3.20)" class="shadow-sm">
+                        <input type="number" step="0.01" id="endo_acd_os" placeholder="OS (e.g., 3.15)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>ACD - IOL Master (mm):</label>
+                        <input type="number" step="0.01" id="acd_iol_od" placeholder="OD (e.g., 3.45)" class="shadow-sm">
+                        <input type="number" step="0.01" id="acd_iol_os" placeholder="OS (e.g., 3.40)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Visual Acuity on Postop Day 1:</label>
+                        <input type="text" id="va_postop1_od" placeholder="OD (e.g., 20/20)" class="shadow-sm">
+                        <input type="text" id="va_postop1_os" placeholder="OS (e.g., 20/25)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>Postoperative Day 1 Vault (µm):</label>
+                        <input type="number" id="vault_postop1_od" placeholder="OD (e.g., 500)" class="shadow-sm">
+                        <input type="number" id="vault_postop1_os" placeholder="OS (e.g., 480)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Size of ICL (mm):</label>
+                        <input type="number" step="0.5" id="icl_size_od" placeholder="OD (e.g., 12.5)" class="shadow-sm">
+                        <input type="number" step="0.5" id="icl_size_os" placeholder="OS (e.g., 12.0)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>Toric ICL:</label>
+                        <select id="toric_icl_od" class="shadow-sm mb-4">
+                            <option value="">OD</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <select id="toric_icl_os" class="shadow-sm">
+                            <option value="">OS</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>IOP on Postop Day 1 (mmHg):</label>
+                        <input type="number" id="iop_postop1_od" placeholder="OD (e.g., 16)" class="shadow-sm">
+                        <input type="number" id="iop_postop1_os" placeholder="OS (e.g., 18)" class="shadow-sm">
+                    </div>
+                    <div class="form-group">
+                        <label>Change in Vault on Subsequent Follow up (µm):</label>
+                        <input type="number" id="vault_change_od" placeholder="OD (e.g., -20)" class="shadow-sm">
+                        <input type="number" id="vault_change_os" placeholder="OS (e.g., +10)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="grid-cols-2">
+                    <div class="form-group">
+                        <label>Status of ICL:</label>
+                        <select id="icl_status_od" class="shadow-sm mb-4">
+                            <option value="">OD</option>
+                            <option value="In Situ">In Situ</option>
+                            <option value="Removed">Removed</option>
+                            <option value="Rotated">Rotated</option>
+                        </select>
+                        <select id="icl_status_os" class="shadow-sm">
+                            <option value="">OS</option>
+                            <option value="In Situ">In Situ</option>
+                            <option value="Removed">Removed</option>
+                            <option value="Rotated">Rotated</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>New Size of ICL (if reordered) (mm):</label>
+                        <input type="number" step="0.5" id="new_icl_size_od" placeholder="OD (e.g., 13.0)" class="shadow-sm">
+                        <input type="number" step="0.5" id="new_icl_size_os" placeholder="OS (e.g., 12.5)" class="shadow-sm">
+                    </div>
+                </div>
+
+                <div class="form-group mt-8">
+                    <label for="submitter_name" class="block text-gray-700 font-bold mb-2">Your Name (Required for submission):</label>
+                    <input type="text" id="submitter_name" placeholder="Enter your name" class="shadow-sm">
+                </div>
+
+                <div class="text-center mt-8 space-x-4">
+                    <button type="submit" class="btn-primary">
+                        Submit Data
+                    </button>
+                    <button type="button" id="get-postop-summary-btn" class="btn-primary bg-green-600 hover:bg-green-700">
+                        ✨ Get Post-op Summary
+                    </button>
+                    <button type="button" id="get-icl-insights-btn" class="btn-primary bg-purple-600 hover:bg-purple-700">
+                        ✨ Get ICL Selection Insights
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section id="admin-view-section" class="mt-12">
+            <h2 class="section-title">Admin Data View (Dr. Vaibhav Namdev)</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-grow">
+                    <label for="admin-email" class="block text-gray-700 font-bold mb-2">Email:</label>
+                    <input type="text" id="admin-email" placeholder="vbhvnamdev@gmail.com" class="shadow-sm">
+                </div>
+                <div class="flex-grow">
+                    <label for="admin-pin" class="block text-gray-700 font-bold mb-2">4-Digit PIN:</label>
+                    <input type="password" id="admin-pin" maxlength="4" placeholder="Enter 4-digit PIN" class="shadow-sm">
+                </div>
+                <div class="flex-none flex items-end">
+                    <button id="view-data-btn" class="btn-primary px-6 py-3">View All Data</button>
+                </div>
+            </div>
+
+            <div id="admin-data-display" class="hidden admin-table-container">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">All Submitted Patient Records:</h3>
+                <div class="scrollable-content">
+                    <table class="admin-table">
+                        <thead>
+                            <tr id="admin-table-headers">
+                                <th>UHID</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Refraction OD</th>
+                                <th>Refraction OS</th>
+                                <th>Axial Length OD</th>
+                                <th>Axial Length OS</th>
+                                <th>WTW IOL OD</th>
+                                <th>WTW IOL OS</th>
+                                <th>WTW Caliper OD</th>
+                                <th>WTW Caliper OS</th>
+                                <th>Endo ACD OD</th>
+                                <th>Endo ACD OS</th>
+                                <th>ACD IOL OD</th>
+                                <th>ACD IOL OS</th>
+                                <th>VA Postop1 OD</th>
+                                <th>VA Postop1 OS</th>
+                                <th>Vault Postop1 OD</th>
+                                <th>Vault Postop1 OS</th>
+                                <th>ICL Size OD</th>
+                                <th>ICL Size OS</th>
+                                <th>Toric ICL OD</th>
+                                <th>Toric ICL OS</th>
+                                <th>IOP Postop1 OD</th>
+                                <th>IOP Postop1 OS</th>
+                                <th>Vault Change OD</th>
+                                <th>Vault Change OS</th>
+                                <th>ICL Status OD</th>
+                                <th>ICL Status OS</th>
+                                <th>New ICL Size OD</th>
+                                <th>New ICL Size OS</th>
+                                <th>Submitter Name</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body">
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="message-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-close-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables (provided by the Canvas environment)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        /**
+         * Initializes Firebase app and services.
+         */
+        const initializeFirebase = async () => {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Authenticate user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase Auth Ready. User ID:", userId);
+                    } else {
+                        userId = crypto.randomUUID(); // Fallback for unauthenticated users, though signInAnonymously should provide a UID
+                        console.log("Firebase Auth Ready. Anonymous User ID:", userId);
+                    }
+                    isAuthReady = true;
+                });
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showMessageModal("Error", "Failed to initialize the application. Please try again later.");
+            }
+        };
+
+        // Call Firebase initialization on window load
+        window.onload = initializeFirebase;
+
+        // --- DOM Elements ---
+        const uhidInput = document.getElementById('uhid');
+        const loadDataBtn = document.getElementById('load-data-btn');
+        const iclDataForm = document.getElementById('icl-data-form');
+        const submitterNameInput = document.getElementById('submitter_name');
+        const adminEmailInput = document.getElementById('admin-email');
+        const adminPinInput = document.getElementById('admin-pin');
+        const viewDataBtn = document.getElementById('view-data-btn');
+        const adminDataDisplay = document.getElementById('admin-data-display');
+        const adminTableBody = document.getElementById('admin-table-body');
+        const getPostopSummaryBtn = document.getElementById('get-postop-summary-btn');
+        const getIclInsightsBtn = document.getElementById('get-icl-insights-btn');
+
+
+        // Message Modal elements
+        const messageModal = document.getElementById('message-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        /**
+         * Shows a custom message modal.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message to display.
+         */
+        const showMessageModal = (title, message) => {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.add('show');
+        };
+
+        /**
+         * Hides the custom message modal.
+         */
+        const hideMessageModal = () => {
+            messageModal.classList.remove('show');
+        };
+
+        // Close modal when OK button is clicked
+        modalCloseBtn.addEventListener('click', hideMessageModal);
+
+        /**
+         * Clears all input fields in the form.
+         */
+        const clearForm = () => {
+            iclDataForm.querySelectorAll('input, select').forEach(field => {
+                if (field.type === 'checkbox' || field.type === 'radio') {
+                    field.checked = false;
+                } else if (field.tagName === 'SELECT') {
+                    field.value = '';
+                } else {
+                    field.value = '';
+                }
+            });
+            uhidInput.value = ''; // Clear UHID separately
+        };
+
+        /**
+         * Populates form fields with patient data.
+         * @param {Object} data - The patient data object.
+         */
+        const populateForm = (data) => {
+            for (const key in data) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = data[key];
+                }
+            }
+        };
+
+        /**
+         * Gathers all form data into an object.
+         * @returns {Object} An object containing all form field values.
+         */
+        const getFormData = () => {
+            return {
+                uhid: uhidInput.value.trim(),
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                refraction_od: document.getElementById('refraction_od').value,
+                refraction_os: document.getElementById('refraction_os').value,
+                axial_length_od: document.getElementById('axial_length_od').value,
+                axial_length_os: document.getElementById('axial_length_os').value,
+                wtw_iol_od: document.getElementById('wtw_iol_od').value,
+                wtw_iol_os: document.getElementById('wtw_iol_os').value,
+                wtw_caliper_od: document.getElementById('wtw_caliper_od').value,
+                wtw_caliper_os: document.getElementById('wtw_caliper_os').value,
+                endo_acd_od: document.getElementById('endo_acd_od').value,
+                endo_acd_os: document.getElementById('endo_acd_os').value,
+                acd_iol_od: document.getElementById('acd_iol_od').value,
+                acd_iol_os: document.getElementById('acd_iol_os').value,
+                va_postop1_od: document.getElementById('va_postop1_od').value,
+                va_postop1_os: document.getElementById('va_postop1_os').value,
+                vault_postop1_od: document.getElementById('vault_postop1_od').value,
+                vault_postop1_os: document.getElementById('vault_postop1_os').value,
+                icl_size_od: document.getElementById('icl_size_od').value,
+                icl_size_os: document.getElementById('icl_size_os').value,
+                toric_icl_od: document.getElementById('toric_icl_od').value,
+                toric_icl_os: document.getElementById('toric_icl_os').value,
+                iop_postop1_od: document.getElementById('iop_postop1_od').value,
+                iop_postop1_os: document.getElementById('iop_postop1_os').value,
+                vault_change_od: document.getElementById('vault_change_od').value,
+                vault_change_os: document.getElementById('vault_change_os').value,
+                icl_status_od: document.getElementById('icl_status_od').value,
+                icl_status_os: document.getElementById('icl_status_os').value,
+                new_icl_size_od: document.getElementById('new_icl_size_od').value,
+                new_icl_size_os: document.getElementById('new_icl_size_os').value,
+                submitterName: submitterNameInput.value.trim(),
+                timestamp: new Date().toISOString()
+            };
+        };
+
+        /**
+         * Saves or updates patient data in Firestore.
+         * @param {Object} patientData - The patient data to save.
+         */
+        const savePatientData = async (patientData) => {
+            if (!isAuthReady || !db || !userId) {
+                showMessageModal("Error", "App is not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const uhid = patientData.uhid;
+            if (!uhid) {
+                showMessageModal("Error", "UHID is required to save data.");
+                return;
+            }
+
+            showMessageModal("Saving Data", "Please wait while we save your data...");
+
+            try {
+                // Using UHID as document ID for easy retrieval/update
+                const docRef = doc(db, `artifacts/${appId}/public/data/icl_patients`, uhid);
+                await setDoc(docRef, patientData); // setDoc will create or overwrite
+                showMessageModal("Success", "Patient data saved successfully!");
+                clearForm();
+            } catch (e) {
+                console.error("Error saving document: ", e);
+                showMessageModal("Error", `Error saving data: ${e.message}`);
+            }
+        };
+
+        /**
+         * Loads patient data from Firestore based on UHID.
+         */
+        loadDataBtn.addEventListener('click', async () => {
+            if (!isAuthReady || !db || !userId) {
+                showMessageModal("Error", "App is not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const uhid = uhidInput.value.trim();
+            if (!uhid) {
+                showMessageModal("Missing UHID", "Please enter a UHID to load data.");
+                return;
+            }
+
+            showMessageModal("Loading Data", "Fetching patient data...");
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/icl_patients`, uhid);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    populateForm(data);
+                    showMessageModal("Data Loaded", `Data for UHID: ${uhid} loaded successfully. You can now update it.`);
+                } else {
+                    clearForm(); // Clear the form if UHID not found for new entry
+                    uhidInput.value = uhid; // Keep the entered UHID
+                    showMessageModal("Not Found", `No data found for UHID: ${uhid}. You can enter new data.`);
+                }
+            } catch (e) {
+                console.error("Error loading document: ", e);
+                showMessageModal("Error", `Error loading data: ${e.message}`);
+            }
+        });
+
+        /**
+         * Handles form submission.
+         */
+        iclDataForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const patientData = getFormData();
+            if (!patientData.uhid) {
+                showMessageModal("Validation Error", "UHID is a mandatory field.");
+                return;
+            }
+            if (!patientData.submitterName) {
+                showMessageModal("Validation Error", "Your name is required before submitting the data.");
+                return;
+            }
+            // Basic validation for age and gender (add more as needed)
+            if (!patientData.age || patientData.age <= 0) {
+                showMessageModal("Validation Error", "Please enter a valid age.");
+                return;
+            }
+            if (!patientData.gender) {
+                showMessageModal("Validation Error", "Please select a gender.");
+                return;
+            }
+
+            savePatientData(patientData);
+        });
+
+        // --- Gemini API Integration ---
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
+        const API_KEY = ""; // Canvas will provide this at runtime
+
+        /**
+         * Makes a call to the Gemini API with a given prompt.
+         * @param {string} prompt - The prompt for the LLM.
+         * @returns {Promise<string>} The generated text from the LLM.
+         */
+        const callGeminiAPI = async (prompt) => {
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+
+                const response = await fetch(GEMINI_API_URL + API_KEY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Unexpected Gemini API response structure:", result);
+                    return "Could not generate insights due to an unexpected response from the AI.";
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return `Failed to connect to AI: ${error.message}.`;
+            }
+        };
+
+        /**
+         * Generates and displays a post-operative summary using Gemini API.
+         */
+        getPostopSummaryBtn.addEventListener('click', async () => {
+            const formData = getFormData();
+            if (!formData.uhid) {
+                showMessageModal("Info", "Please enter/load patient data first to get a summary.");
+                return;
+            }
+
+            const prompt = `Generate a concise, objective summary of the patient's immediate post-operative Day 1 status based on the following ICL surgery data. Focus on visual acuity, vault, and IOP. If data is 'N/A' or empty, mention it as such.
+
+            UHID: ${formData.uhid}
+            Visual Acuity on Postop Day 1 OD: ${formData.va_postop1_od || 'N/A'}
+            Visual Acuity on Postop Day 1 OS: ${formData.va_postop1_os || 'N/A'}
+            Postoperative Day 1 Vault OD: ${formData.vault_postop1_od ? formData.vault_postop1_od + ' µm' : 'N/A'}
+            Postoperative Day 1 Vault OS: ${formData.vault_postop1_os ? formData.vault_postop1_os + ' µm' : 'N/A'}
+            IOP on Postop Day 1 OD: ${formData.iop_postop1_od ? formData.iop_postop1_od + ' mmHg' : 'N/A'}
+            IOP on Postop Day 1 OS: ${formData.iop_postop1_os ? formData.iop_postop1_os + ' mmHg' : 'N/A'}
+            ICL Status OD: ${formData.icl_status_od || 'N/A'}
+            ICL Status OS: ${formData.icl_status_os || 'N/A'}
+
+            Provide the summary in a paragraph, suitable for a medical record note. Do not add any disclaimers or conversational text.`;
+
+            showMessageModal("Generating Summary", "Please wait, the AI is generating the post-operative summary...");
+            const summary = await callGeminiAPI(prompt);
+            showMessageModal("Post-operative Day 1 Summary", summary + "\n\nDisclaimer: This summary is AI-generated and for informational purposes only. It does not constitute medical advice or a clinical diagnosis.");
+        });
+
+        /**
+         * Generates and displays ICL selection insights using Gemini API.
+         */
+        getIclInsightsBtn.addEventListener('click', async () => {
+            const formData = getFormData();
+            if (!formData.uhid) {
+                showMessageModal("Info", "Please enter/load patient data first to get ICL selection insights.");
+                return;
+            }
+
+            const prompt = `Provide general, educational insights regarding ICL selection based on the following pre-operative measurements. This is for informational purposes and not a substitute for official calculation tools or clinical judgment. If data is 'N/A' or empty, mention it as such.
+
+            Patient Age: ${formData.age || 'N/A'}
+            Manifest Refraction OD: ${formData.refraction_od || 'N/A'}
+            Manifest Refraction OS: ${formData.refraction_os || 'N/A'}
+            Axial Length OD: ${formData.axial_length_od ? formData.axial_length_od + ' mm' : 'N/A'}
+            Axial Length OS: ${formData.axial_length_os ? formData.axial_length_os + ' mm' : 'N/A'}
+            Horizontal White to White diameter (IOL Master) OD: ${formData.wtw_iol_od ? formData.wtw_iol_od + ' mm' : 'N/A'}
+            Horizontal White to White diameter (IOL Master) OS: ${formData.wtw_iol_os ? formData.wtw_iol_os + ' mm' : 'N/A'}
+            Horizontal WTW diameter (Digital Callipers) OD: ${formData.wtw_caliper_od ? formData.wtw_caliper_od + ' mm' : 'N/A'}
+            Horizontal WTW diameter (Digital Callipers) OS: ${formData.wtw_caliper_os ? formData.wtw_caliper_os + ' mm' : 'N/A'}
+            Endo ACD OD: ${formData.endo_acd_od ? formData.endo_acd_od + ' mm' : 'N/A'}
+            Endo ACD OS: ${formData.endo_acd_os ? formData.endo_acd_os + ' mm' : 'N/A'}
+            ACD (IOL Master) OD: ${formData.acd_iol_od ? formData.acd_iol_od + ' mm' : 'N/A'}
+            ACD (IOL Master) OS: ${formData.acd_iol_os ? formData.acd_iol_os + ' mm' : 'N/A'}
+
+            Provide the insights in a few sentences or a small paragraph. Do not add any disclaimers or conversational text.`;
+
+            showMessageModal("Generating ICL Selection Insights", "Please wait, the AI is generating insights...");
+            const insights = await callGeminiAPI(prompt);
+            showMessageModal("ICL Selection Insights", insights + "\n\nDisclaimer: These insights are AI-generated for general informational purposes only and do not replace professional medical judgment, detailed calculations, or clinical guidelines.");
+        });
+
+
+        // --- Admin View Logic ---
+        const ADMIN_EMAIL = 'vbhvnamdev@gmail.com';
+        const ADMIN_PIN = '2906';
+
+        /**
+         * Fetches and displays all patient data for the admin.
+         */
+        viewDataBtn.addEventListener('click', async () => {
+            if (!isAuthReady || !db || !userId) {
+                showMessageModal("Error", "App is not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const enteredEmail = adminEmailInput.value.trim();
+            const enteredPin = adminPinInput.value.trim();
+
+            if (enteredEmail !== ADMIN_EMAIL || enteredPin !== ADMIN_PIN) {
+                showMessageModal("Access Denied", "Incorrect Email or PIN. Access forbidden.");
+                adminDataDisplay.classList.add('hidden'); // Hide if previously shown
+                return;
+            }
+
+            showMessageModal("Loading All Data", "Fetching all patient records for Dr. Vaibhav Namdev...");
+
+            try {
+                const patientsColRef = collection(db, `artifacts/${appId}/public/data/icl_patients`);
+                const q = query(patientsColRef);
+                const querySnapshot = await getDocs(q);
+
+                let allPatientsData = [];
+                querySnapshot.forEach((doc) => {
+                    allPatientsData.push(doc.data());
+                });
+
+                displayAdminData(allPatientsData);
+                adminDataDisplay.classList.remove('hidden');
+                showMessageModal("Success", "All patient data loaded successfully.");
+            } catch (e) {
+                console.error("Error fetching all documents: ", e);
+                showMessageModal("Error", `Error fetching all data: ${e.message}`);
+            }
+        });
+
+        /**
+         * Displays the fetched patient data in the admin table.
+         * @param {Array<Object>} data - An array of patient data objects.
+         */
+        const displayAdminData = (data) => {
+            adminTableBody.innerHTML = ''; // Clear existing rows
+
+            if (data.length === 0) {
+                adminTableBody.innerHTML = '<tr><td colspan="33" class="text-center py-4">No patient records found.</td></tr>';
+                return;
+            }
+
+            // Define the order of keys for table headers and rows
+            const orderedKeys = [
+                'uhid', 'age', 'gender', 'refraction_od', 'refraction_os', 'axial_length_od', 'axial_length_os',
+                'wtw_iol_od', 'wtw_iol_os', 'wtw_caliper_od', 'wtw_caliper_os', 'endo_acd_od', 'endo_acd_os',
+                'acd_iol_od', 'acd_iol_os', 'va_postop1_od', 'va_postop1_os', 'vault_postop1_od', 'vault_postop1_os',
+                'icl_size_od', 'icl_size_os', 'toric_icl_od', 'toric_icl_os', 'iop_postop1_od', 'iop_postop1_os',
+                'vault_change_od', 'vault_change_os', 'icl_status_od', 'icl_status_os', 'new_icl_size_od',
+                'new_icl_size_os', 'submitterName', 'timestamp'
+            ];
+
+            data.forEach(patient => {
+                const row = document.createElement('tr');
+                orderedKeys.forEach(key => {
+                    const cell = document.createElement('td');
+                    let value = patient[key];
+
+                    // Format timestamp for readability
+                    if (key === 'timestamp' && value) {
+                        try {
+                            value = new Date(value).toLocaleString();
+                        } catch (e) {
+                            value = 'Invalid Date';
+                        }
+                    }
+                    cell.textContent = value || 'N/A'; // Display 'N/A' for empty values
+                    row.appendChild(cell);
+                });
+                adminTableBody.appendChild(row);
+            });
+        };
+
+    </script>
+</body>
+</html>
